@@ -1,19 +1,20 @@
 #!/usr/bin/python
 import argparse
 import speedtest
+import sys
 
 
 def grab_args() -> object:
     parser = argparse.ArgumentParser(
         description="Runs a speedtest and reports the result in an Icinga2 friendly format.\n" \
-                    "Requires speedtest-cli installed.")
+                    "Requires speedtest.py installed.")
 
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('dw', type=float, help="Download warning level (Mbps)")
     parser.add_argument('dc', type=float, help="Download critical level (Mbps)")
     parser.add_argument('uw', type=float, help="Upload warning level (Mbps)")
     parser.add_argument('uc', type=float, help="Upload critical level (Mbps)")
-    parser.add_argument('-s', '--server', type=int, help="Server ID taken from the 'speedtest-cli --list' output")
+    parser.add_argument('-s', '--server', type=int, help="Server ID taken from the 'speedtest.py --list' output")
 
     return parser.parse_args()
 
@@ -61,3 +62,10 @@ if __name__ == '__main__':
     output = process_result(s.results, args)
 
     print(output)
+
+    if "CRITICAL" in output:
+        sys.exit(2)
+    elif "WARNING" in output:
+        sys.exit(1)
+    else:
+        sys.exit(0)
